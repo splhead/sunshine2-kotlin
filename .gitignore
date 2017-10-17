@@ -40,4 +40,5 @@ project.properties
 
 ##Gradle-based build
 .gradle
+gradle.properties
 build/
