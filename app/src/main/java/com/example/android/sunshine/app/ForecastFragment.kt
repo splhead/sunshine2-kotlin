@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Toast
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -69,6 +70,10 @@ class ForecastFragment : Fragment() {
 
         val listviewForecast = rootView.findViewById<ListView>(R.id.listview_forecast)
         listviewForecast.adapter = mForecastAdapter
+        listviewForecast.setOnItemClickListener { parent, view, position, id ->
+            val forecast = mForecastAdapter!!.getItem(position)
+            Toast.makeText(activity, forecast, Toast.LENGTH_SHORT).show()
+        }
 
         return rootView
     }
