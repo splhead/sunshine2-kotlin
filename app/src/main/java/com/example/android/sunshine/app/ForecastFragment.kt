@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app
 
+import android.content.Intent
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
@@ -8,7 +9,6 @@ import android.util.Log
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import android.widget.Toast
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -72,7 +72,10 @@ class ForecastFragment : Fragment() {
         listviewForecast.adapter = mForecastAdapter
         listviewForecast.setOnItemClickListener { parent, view, position, id ->
             val forecast = mForecastAdapter!!.getItem(position)
-            Toast.makeText(activity, forecast, Toast.LENGTH_SHORT).show()
+            val intent = Intent(activity, DetailActivity::class.java)
+            intent.putExtra(Intent.EXTRA_TEXT, forecast)
+            Log.d(TAG, "starting activity")
+            startActivity(intent)
         }
 
         return rootView
