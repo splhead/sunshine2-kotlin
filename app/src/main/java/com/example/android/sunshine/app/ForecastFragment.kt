@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.*
@@ -48,7 +49,7 @@ class ForecastFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
-        val data: Array<String> = arrayOf(
+        /*val data: Array<String> = arrayOf(
                 "Today - Sunny - 88/63"
                 , "Tomorrow - Foggy - 70/46"
                 , "Weds - Cloudy - 72/63"
@@ -59,13 +60,13 @@ class ForecastFragment : Fragment() {
         )
 
         val weekForecasts: ArrayList<String> = ArrayList()
-        weekForecasts.addAll(data)
+        weekForecasts.addAll(data)*/
 
         mForecastAdapter = ArrayAdapter(
                 activity
                 , R.layout.list_item_forecast
                 , R.id.list_item_forecast_textView
-                , weekForecasts
+                , ArrayList<String>()
         )
 
         val listviewForecast = rootView.findViewById<ListView>(R.id.listview_forecast)
@@ -91,9 +92,21 @@ class ForecastFragment : Fragment() {
 
 
         return if (id == R.id.action_refresh) {
-            FetchWeatherTask().execute("94043")
+            updateWeather()
             true
         } else super.onOptionsItemSelected(item)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        updateWeather()
+    }
+
+    private fun updateWeather() {
+        val sharedPreference = PreferenceManager.getDefaultSharedPreferences(activity)
+        val location = sharedPreference.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default))
+        FetchWeatherTask().execute(location)
     }
 
     inner class FetchWeatherTask : AsyncTask<String, Void, ArrayList<String>>() {
@@ -156,7 +169,17 @@ class ForecastFragment : Fragment() {
             return shortenedDateFormat.format(time)
         }
 
-        private fun formatHighLows(high: Double, low: Double): String {
+        private fun formatHighLows(_high: Double, _low: Double, unitType: String): String {
+            var high = _high
+            var low = _low
+
+            if (unitType == getString(R.string.pref_units_imperial)) {
+                high = (high * 1.8) + 32
+                low = (low * 1.8) + 32
+            } else if (unitType != getString(R.string.pref_units_metric)) {
+                Log.d(TAG, "Unit type not found: " + unitType)
+            }
+
             val roundedHigh = Math.round(high)
             val roundedLow = Math.round(low)
             return roundedHigh.toString().plus("/").plus(roundedLow)
@@ -169,6 +192,12 @@ class ForecastFragment : Fragment() {
             val dayTime = Calendar.getInstance()
 
             val resultStrs = ArrayList<String>()
+
+            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity)
+            val unitType = sharedPrefs.getString(
+                    getString(R.string.pref_units_key),
+                    getString(R.string.pref_units_metric)
+            )
 
             for (i in 0..(weatherArray.length() - 1)) {
                 var day: String
@@ -189,7 +218,7 @@ class ForecastFragment : Fragment() {
                 val high: Double = temperatureObject.getDouble(OWM_MAX)
                 val low: Double = temperatureObject.getDouble(OWM_MIN)
 
-                highAndLow = formatHighLows(high, low)
+                highAndLow = formatHighLows(high, low, unitType)
 
                 resultStrs.add(i, "$day - $description - $highAndLow")
             }

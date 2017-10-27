@@ -31,6 +31,7 @@ class DetailActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.itemId
         if (id == R.id.action_settings) {
+            startActivity(Intent(this, SettingsActivity::class.java))
             return true
         }
         return super.onOptionsItemSelected(item)
